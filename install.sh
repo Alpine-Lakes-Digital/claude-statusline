@@ -24,8 +24,13 @@ jq -e . "$settings" >/dev/null 2>&1 || { echo "install: $settings is not valid J
 backup="$settings.bak-$(date +%Y%m%d%H%M%S)"
 cp "$settings" "$backup"
 
+# Use ~ form for the default location so the settings file stays portable;
+# an explicit CLAUDE_DIR gets its real path.
+cmd="$dir/statusline.sh"
+[[ $dir == "$HOME/.claude" ]] && cmd="~/.claude/statusline.sh"
+
 tmp="$settings.tmp.$$"
-jq '. + {statusLine: {type: "command", command: "~/.claude/statusline.sh", padding: 0}}' "$settings" > "$tmp"
+jq --arg cmd "$cmd" '. + {statusLine: {type: "command", command: $cmd, padding: 0}}' "$settings" > "$tmp"
 jq -e . "$tmp" >/dev/null
 mv "$tmp" "$settings"
 
