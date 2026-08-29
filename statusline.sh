@@ -164,7 +164,7 @@ L2_PARTS=()
 [[ -n $EMAIL ]] && L2_PARTS+=("${GREY}${EMAIL}${RST}")
 [[ -n $MODEL ]] && L2_PARTS+=("${MAUVE}${MODEL}${RST}")
 # effort is absent for models without the reasoning-effort parameter
-[[ -n $EFFORT ]] && L2_PARTS+=("${GREY}effort${RST} ${MAUVE}${EFFORT}${RST}")
+[[ -n $EFFORT ]] && L2_PARTS+=("${MAUVE}${EFFORT}${RST}")
 if [[ -n $CW_SIZE ]]; then
   L2_PARTS+=("${GREY}$(fmt_tok "$(int "$CW_SIZE")") ctx${RST}")
 fi
