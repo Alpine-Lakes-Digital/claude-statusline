@@ -11,7 +11,7 @@ sed 's|if command -v jq >/dev/null 2>&1; then|if false; then|' "$script" > "$tmp
 chmod +x "$tmp/nojq.sh"
 
 fail=0
-for p in full no-rates null-ctx deep bare garbage empty; do
+for p in full no-rates null-ctx deep no-effort max-effort bare garbage empty; do
   payload=$("$here/payloads.sh" "$p")
 
   out=$(printf '%s' "$payload" | CLAUDE_ACCOUNT_EMAIL=user@example.com bash "$script"); rc=$?

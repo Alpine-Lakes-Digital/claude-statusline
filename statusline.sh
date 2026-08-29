@@ -28,7 +28,8 @@ if command -v jq >/dev/null 2>&1; then
       g(.context_window.used_percentage), g(.context_window.total_input_tokens),
       g(.context_window.total_output_tokens), g(.context_window.context_window_size),
       g(.rate_limits.five_hour.used_percentage), g(.rate_limits.five_hour.resets_at),
-      g(.rate_limits.seven_day.used_percentage), g(.rate_limits.seven_day.resets_at)
+      g(.rate_limits.seven_day.used_percentage), g(.rate_limits.seven_day.resets_at),
+      g(.effort.level)
     ] | .[]' 2>/dev/null)
 elif command -v python3 >/dev/null 2>&1; then
   # Correct path-aware fallback. Leaf names in this schema are NOT unique
@@ -49,7 +50,8 @@ for p in [("workspace","current_dir"),("cwd",),("model","id"),("model","display_
           ("context_window","used_percentage"),("context_window","total_input_tokens"),
           ("context_window","total_output_tokens"),("context_window","context_window_size"),
           ("rate_limits","five_hour","used_percentage"),("rate_limits","five_hour","resets_at"),
-          ("rate_limits","seven_day","used_percentage"),("rate_limits","seven_day","resets_at")]:
+          ("rate_limits","seven_day","used_percentage"),("rate_limits","seven_day","resets_at"),
+          ("effort","level")]:
     print(g(*p))
 ' 2>/dev/null)
 else
@@ -131,6 +133,7 @@ MODEL=$(f 2); [[ -z $MODEL ]] && MODEL=$(f 3)
 CW_PCT=$(f 4); CW_IN=$(f 5); CW_OUT=$(f 6); CW_SIZE=$(f 7)
 R5_PCT=$(f 8); R5_AT=$(f 9)
 R7_PCT=$(f 10); R7_AT=$(f 11)
+EFFORT=$(f 12)
 
 # ---------- account email (cached; refreshed in the background) ----------
 EMAIL="${CLAUDE_ACCOUNT_EMAIL:-}"
@@ -160,6 +163,8 @@ fi
 L2_PARTS=()
 [[ -n $EMAIL ]] && L2_PARTS+=("${GREY}${EMAIL}${RST}")
 [[ -n $MODEL ]] && L2_PARTS+=("${MAUVE}${MODEL}${RST}")
+# effort is absent for models without the reasoning-effort parameter
+[[ -n $EFFORT ]] && L2_PARTS+=("${GREY}effort${RST} ${MAUVE}${EFFORT}${RST}")
 if [[ -n $CW_SIZE ]]; then
   L2_PARTS+=("${GREY}$(fmt_tok "$(int "$CW_SIZE")") ctx${RST}")
 fi

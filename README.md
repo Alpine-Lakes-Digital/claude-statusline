@@ -4,12 +4,12 @@ A three-line status line for the [Claude Code](https://code.claude.com) CLI.
 
 ```
 ~/Work/Genesis1 on master*
-owen@example.com · claude-opus-5[1m] · 1.0M ctx
+owen@example.com · claude-opus-5[1m] · effort medium · 1.0M ctx
 ctx ██░░░░░░░░ 19% 193.4k  │  5h ████░░░░░░ 42% ↻2h0m  │  7d █████████░ 88% ↻3d3h
 ```
 
 1. Working directory (abbreviated, `~`-relative) and git branch, with `*` when the tree is dirty.
-2. Account email · model id · context window size.
+2. Account email · model id · reasoning effort · context window size.
 3. Context usage, 5-hour limit, and 7-day limit — each a colour-graded bar (green → yellow → red)
    with a countdown to the window's reset.
 
@@ -60,6 +60,9 @@ segment by segment rather than rendering zeros:
   Claude Code drops a window once its `resets_at` passes.
 - **`context_window`** is `null` before the first API call and again after `/compact`, until the
   next response repopulates it.
+- **`effort`** appears only for models that support the reasoning-effort parameter, so the
+  segment is omitted rather than blank on models that don't. It tracks the live session value,
+  including mid-session `/effort` changes.
 
 Two implementation choices worth knowing if you fork this:
 
@@ -78,9 +81,9 @@ Two implementation choices worth knowing if you fork this:
 ./test/run-tests.sh
 ```
 
-Runs seven payload shapes (full, missing rate limits, null context, deep path, empty object,
-malformed input, empty input), asserting the script always exits 0 and that both parser paths
-agree.
+Runs nine payload shapes (full, missing rate limits, null context, deep path, no effort field,
+max effort, empty object, malformed input, empty input), asserting the script always exits 0 and
+that both parser paths agree.
 
 ## Credits
 
