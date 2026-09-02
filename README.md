@@ -87,7 +87,17 @@ that both parser paths agree.
 
 ## Credits
 
-Inspired by [Andrew Connell's status line article](https://www.andrewconnell.com/articles/claude-code-cli-statusline/).
+This started when I was searching for solutions to display context and session usage on the claude code cli status line. I found [Andrew Connell's status line article](https://www.andrewconnell.com/articles/claude-code-cli-statusline/),
+which was perfect. His three-line
+layout is kept here, and so are his environment variable names — `CLAUDE_STATUSLINE_BAR`,
+`CLAUDE_STATUSLINE_BAR_WIDTH`, and `CLAUDE_ACCOUNT_EMAIL` — deliberately, so anyone moving from
+his script to this one keeps their existing configuration.
+
+The implementation is my own, and diverges where I wanted something his didn't cover: one
+parsing pass instead of one per field, a `python3` fallback rather than grep/sed, path-aware
+extraction, the reasoning-effort segment, install/uninstall scripts, and a test suite. If you
+want the shorter path, his version is simpler and he explains it well — start there.
+
 Written against the [official status line schema](https://code.claude.com/docs/en/statusline).
 
 MIT licensed.
