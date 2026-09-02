@@ -127,10 +127,13 @@ short_dir() {
   [[ -z $d ]] && { printf '?'; return; }
   if [[ $d == "$HOME" ]]; then printf '~'; return; fi
   [[ $d == "$HOME"/* ]] && d="~/${d#"$HOME"/}"
-  # Keep the last three segments; elide the rest.
+  # Keep the last three segments; elide the rest. Pure parameter expansion:
+  # `rev` and `cut` are absent from a stock Windows Git Bash, and this runs on
+  # every assistant message, so it also drops four subprocesses per render.
   rest=${d#/}; rest=${rest#\~/}
-  if (( $(tr -cd '/' <<< "$rest" | wc -c) >= 3 )); then
-    printf '…/%s' "$(rev <<< "$rest" | cut -d/ -f1-3 | rev)"
+  if [[ $rest == */*/*/* ]]; then          # four or more segments
+    while [[ $rest == */*/*/* ]]; do rest=${rest#*/}; done
+    printf '…/%s' "$rest"
   else
     printf '%s' "$d"
   fi

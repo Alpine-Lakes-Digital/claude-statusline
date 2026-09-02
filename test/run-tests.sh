@@ -48,6 +48,12 @@ for bad in '190%' '420%' '880%' '1.9M'; do
     echo "FAIL values: found 10x artifact '$bad' (int() appending its fallback?)"; fail=1
   fi
 done
+# Path elision must not depend on `rev`/`cut` (absent on stock Windows Git Bash).
+deep=$("$here/payloads.sh" deep | CLAUDE_ACCOUNT_EMAIL=user@example.com bash "$script" | strip_ansi)
+if [[ "$deep" != *"…/c/d/e"* ]]; then
+  echo "FAIL path: expected '…/c/d/e' in deep-payload output, got: ${deep%%$'\n'*}"; fail=1
+fi
+
 (( fail == 0 )) && echo "ok   values"
 
 echo
