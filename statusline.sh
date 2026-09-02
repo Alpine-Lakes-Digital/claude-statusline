@@ -13,6 +13,10 @@
 # Reads session JSON on stdin. Every field is optional: rate_limits appears only
 # for Pro/Max accounts and only after the first API response, and context_window
 # is null early in a session and again after /compact.
+#
+# Layout and environment-variable names follow Andrew Connell's status line:
+#   https://www.andrewconnell.com/articles/claude-code-cli-statusline/
+# Implementation is independent. MIT licensed — see LICENSE.
 
 set -uo pipefail
 

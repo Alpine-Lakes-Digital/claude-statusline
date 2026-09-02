@@ -3,7 +3,7 @@
 A three-line status line for the [Claude Code](https://code.claude.com) CLI.
 
 ```
-~/Work/Genesis1 on master*
+~/Work/project on master*
 owen@example.com · claude-opus-5[1m] · medium · 1.0M ctx
 ctx ██░░░░░░░░ 19% 193.4k  │  5h ████░░░░░░ 42% ↻2h0m  │  7d █████████░ 88% ↻3d3h
 ```
@@ -16,7 +16,7 @@ ctx ██░░░░░░░░ 19% 193.4k  │  5h ████░░░░�
 ## Install
 
 ```sh
-git clone <this repo> && cd claude-statusline
+git clone https://github.com/Alpine-Lakes-Digital/claude-statusline.git && cd claude-statusline
 ./install.sh
 ```
 
