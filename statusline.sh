@@ -65,7 +65,10 @@ fi
 
 # mapfile, not `read -a`: newline is IFS whitespace, so read would collapse
 # consecutive blank fields and shift every later index.
-mapfile -t F <<< "$RAW"
+# jq on Windows writes stdout in text mode, so every field arrives with a
+# trailing CR. Strip it here: left in place it defeats every numeric parse
+# below, and the damage is silent.
+mapfile -t F < <(printf '%s' "$RAW" | tr -d '\r')
 f() { printf '%s' "${F[$1]:-}"; }
 
 # ---------- colors ----------
@@ -97,7 +100,10 @@ bar() {
 }
 
 # ---------- formatting helpers ----------
-int() { printf '%.0f' "${1:-0}" 2>/dev/null || printf '0'; }
+# Substitute on failure, never append. `printf ... || printf '0'` emitted the
+# partially-parsed value AND the fallback, so a stray trailing character
+# turned 50 into 500 and 19.3 into 190.
+int() { local v; v=$(printf '%.0f' "${1:-0}" 2>/dev/null) || v=0; printf '%s' "${v:-0}"; }
 
 fmt_tok() {
   local n=${1:-0}
