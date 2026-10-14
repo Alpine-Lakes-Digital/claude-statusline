@@ -54,6 +54,19 @@ if [[ "$deep" != *"…/c/d/e"* ]]; then
   echo "FAIL path: expected '…/c/d/e' in deep-payload output, got: ${deep%%$'\n'*}"; fail=1
 fi
 
+# Tag: shown when the marker exists at or above the working dir, absent otherwise.
+mk=$(mktemp -d "$tmp/tag.XXXX"); mkdir -p "$mk/vault/.marker" "$mk/vault/sub/deep" "$mk/other"
+tagout() { jq -n --arg d "$1" '{workspace:{current_dir:$d}}' \
+  | CLAUDE_ACCOUNT_EMAIL=user@example.com CLAUDE_STATUSLINE_TAG_MARKER=.marker \
+    CLAUDE_STATUSLINE_TAG='TAGGED' bash "$script" | strip_ansi | head -1; }
+[[ "$(tagout "$mk/vault/sub/deep")" == *TAGGED* ]] || { echo "FAIL tag: missing below marker"; fail=1; }
+[[ "$(tagout "$mk/vault")" == *TAGGED* ]]          || { echo "FAIL tag: missing at marker"; fail=1; }
+[[ "$(tagout "$mk/other")" != *TAGGED* ]]          || { echo "FAIL tag: shown without marker"; fail=1; }
+# The email extraction must actually match `claude auth status` JSON.
+got=$(printf '{\n  "loggedIn": true,\n  "email": "a@b.example",\n  "orgId": "x"\n}\n' \
+  | sed -n "$(grep -o "'s/\.\*\"email\"[^']*'" "$script" | tr -d "'")")
+[[ $got == a@b.example ]] || { echo "FAIL email: extraction returned '$got'"; fail=1; }
+
 (( fail == 0 )) && echo "ok   values"
 
 echo
