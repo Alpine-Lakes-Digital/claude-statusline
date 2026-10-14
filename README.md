@@ -49,6 +49,8 @@ optional — the branch segment is simply omitted without it. Colours need a tru
 | `CLAUDE_STATUSLINE_BAR=0` | Hide the bars; show percentages only |
 | `CLAUDE_STATUSLINE_BAR_WIDTH=N` | Bar width in characters (default `10`) |
 | `CLAUDE_ACCOUNT_EMAIL=…` | Use this email and skip the `claude auth status` lookup |
+| `CLAUDE_STATUSLINE_TAG_MARKER=path` | Show a tag on line 1 when `path` exists in the working directory or any parent (e.g. `.obsidian`) |
+| `CLAUDE_STATUSLINE_TAG=text` | The tag text; both variables must be set |
 
 ## Notes on the data
 

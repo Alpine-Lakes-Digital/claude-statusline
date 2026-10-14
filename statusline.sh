@@ -9,6 +9,9 @@
 #   CLAUDE_STATUSLINE_BAR=0          hide the bars, show percentages only
 #   CLAUDE_STATUSLINE_BAR_WIDTH=N    bar width in characters (default 10)
 #   CLAUDE_ACCOUNT_EMAIL=...         skip the `claude auth status` lookup
+#   CLAUDE_STATUSLINE_TAG_MARKER=P   show a tag on line 1 when relative path P
+#                                    exists in the working dir or any parent
+#   CLAUDE_STATUSLINE_TAG=TEXT       the tag to show (both must be set)
 #
 # Reads session JSON on stdin. Every field is optional: rate_limits appears only
 # for Pro/Max accounts and only after the first API response, and context_window
@@ -154,10 +157,14 @@ CACHE="$HOME/.claude/.statusline-email"
 if [[ -z $EMAIL ]]; then
   [[ -s $CACHE ]] && EMAIL=$(< "$CACHE")
   age=$(( $(date +%s) - $(stat -c %Y "$CACHE" 2>/dev/null || echo 0) ))
+  # A re-login rewrites the credentials file, so a cache older than it may name
+  # the previous account: refresh now rather than up to a day later.
+  CREDS="$HOME/.claude/.credentials.json"
+  [[ -f $CREDS && $CREDS -nt $CACHE ]] && age=86401
   if (( age > 86400 )) && command -v claude >/dev/null 2>&1; then
     # Never block the status line on this: refresh detached, use the stale value now.
     ( timeout 10 claude auth status 2>/dev/null \
-        | sed -n 's/.*"email"[[:space:]]*:[[:space:]]*"\\([^"]*\\)".*/\\1/p' > "$CACHE.tmp" \
+        | sed -n 's/.*"email"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' > "$CACHE.tmp" \
       && [[ -s "$CACHE.tmp" ]] && mv "$CACHE.tmp" "$CACHE" || rm -f "$CACHE.tmp" ) \
       >/dev/null 2>&1 &
     disown 2>/dev/null || true
@@ -170,6 +177,16 @@ if [[ -n $DIR ]] && BR=$(git -C "$DIR" rev-parse --abbrev-ref HEAD 2>/dev/null);
   DIRTY=""
   git -C "$DIR" diff --quiet --ignore-submodules HEAD 2>/dev/null || DIRTY="*"
   L1+=" ${GREY}on${RST} ${MAUVE}${BR}${DIRTY}${RST}"
+fi
+# Optional tag: walk up from DIR looking for the marker path.
+MARKER="${CLAUDE_STATUSLINE_TAG_MARKER:-}"; TAG="${CLAUDE_STATUSLINE_TAG:-}"
+if [[ -n $MARKER && -n $TAG && $DIR == /* ]]; then
+  d=$DIR
+  while :; do
+    if [[ -e "${d%/}/$MARKER" ]]; then L1+="  ${MAUVE}${BOLD}${TAG}${RST}"; break; fi
+    [[ $d == / ]] && break
+    d=${d%/*}; [[ -z $d ]] && d=/
+  done
 fi
 
 # ---------- line 2: account · model · window size ----------
